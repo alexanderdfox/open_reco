@@ -1,0 +1,14 @@
+[package]
+name = "open_reco"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = "0.8"
+chrono = { version = "0.4", features = ["serde"] }
+ndarray = "0.15"
+rayon = "1.8"          # parallel candidate scoring
+indexmap = "2.0"       # ordered maps
+thiserror = "1.0"
