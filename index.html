@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Clean-Room Video Recommendation Algorithm</title>
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false}
+            ]
+          });"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Computer+Modern+Serif&family=Latin+Modern+Mono&display=swap');
+
+    :root {
+      --text: #1a1a1a;
+      --muted: #444;
+      --rule: #bbb;
+      --bg: #fdfdfd;
+      --accent: #1a365d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Latin Modern Roman", "Computer Modern Serif", "Times New Roman", Times, serif;
+      font-size: 11.5pt;
+      line-height: 1.55;
+      color: var(--text);
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+    }
+
+    .page {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 3.2rem 2.2rem 4rem;
+    }
+
+    /* Title block – LaTeX article style */
+    header {
+      text-align: center;
+      margin-bottom: 2.8rem;
+    }
+
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      margin: 0 0 0.6rem;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+      font-style: italic;
+    }
+
+    .authors {
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    hr.rule {
+      border: none;
+      border-top: 1px solid var(--rule);
+      margin: 1.8rem 0;
+    }
+
+    /* Sections */
+    h2 {
+      font-size: 1.22rem;
+      font-weight: 700;
+      margin: 2.1rem 0 0.7rem;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.25rem;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    p {
+      margin: 0.65rem 0;
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    /* Abstract */
+    .abstract {
+      margin: 1.5rem 0 2rem;
+      font-size: 0.95rem;
+    }
+
+    .abstract-title {
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin: 0.5rem 0 0.8rem 1.4rem;
+      padding: 0;
+    }
+
+    li {
+      margin: 0.25rem 0;
+    }
+
+    /* Code / algorithm blocks */
+    .algorithm {
+      background: #f7f7f7;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 1rem 1.2rem;
+      margin: 1.1rem 0;
+      font-family: "Latin Modern Mono", "Courier New", monospace;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      overflow-x: auto;
+    }
+
+    .algorithm .kw {
+      font-weight: 700;
+      color: #000;
+    }
+
+    .algorithm .comment {
+      color: #666;
+      font-style: italic;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.4rem;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.4rem 0.65rem;
+      text-align: left;
+    }
+
+    th {
+      background: #f0f0f0;
+      font-weight: 700;
+    }
+
+    /* Math helpers */
+    .math-block {
+      margin: 1rem 0;
+      text-align: center;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--rule);
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* Print */
+    @media print {
+      body { background: white; }
+      .page { padding: 0; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <header>
+      <h1>A Clean-Room Video Recommendation Algorithm</h1>
+      <div class="subtitle">An Independent Two-Stage System Inspired by Public Descriptions of Large-Scale Recommenders</div>
+      <div class="authors">Clean-Room Design</div>
+      <div class="meta">November 2026 &nbsp;·&nbsp; Educational / Research Prototype</div>
+    </header>
+
+    <hr class="rule">
+
+    <div class="abstract">
+      <div class="abstract-title">Abstract</div>
+      <p>
+        We present a complete, independently designed video recommendation algorithm that follows the publicly known two-stage architecture used by major video platforms: candidate generation followed by ranking. The system is constructed exclusively from open techniques and the high-level descriptions published by platform operators. No proprietary code, model weights, or internal documentation is used. The resulting algorithm is therefore free of intellectual-property contamination and suitable for educational, research, or commercial clean-room implementations.
+      </p>
+    </div>
+
+    <h2>1. Introduction</h2>
+    <p>
+      Large-scale video recommendation systems typically employ a two-stage pipeline. The first stage (candidate generation) retrieves a few hundred items from a corpus of millions or billions with high recall. The second stage (ranking) scores those candidates with high precision and returns a short ordered list. This design has been publicly described in research papers and platform documentation since at least 2016.
+    </p>
+    <p>
+      The algorithm below is a clean-room reconstruction of that architecture. All components—feature construction, retrieval, scoring, and feedback—are original implementations based solely on publicly available knowledge.
+    </p>
+
+    <h2>2. System Architecture</h2>
+    <p>
+      Let $\mathcal{U}$ be the set of users and $\mathcal{V}$ the set of videos. Given a user $u \in \mathcal{U}$, the system returns an ordered list of $n$ videos:
+    </p>
+
+    <div class="math-block">
+      $$
+      \mathrm{Recommend}(u, n) = \mathrm{Top}\text{-}n\bigl(\mathrm{Rank}\bigl(\mathrm{Candidates}(u)\bigr)\bigr)
+      $$
+    </div>
+
+    <h3>2.1 Candidate Generation</h3>
+    <p>
+      The candidate generator produces a set $C_u \subset \mathcal{V}$ of size roughly 200–600. Three complementary strategies are combined:
+    </p>
+
+    <ol>
+      <li><strong>Embedding retrieval.</strong> Users and videos are mapped into a shared $d$-dimensional space. Videos nearest to the user embedding (cosine similarity) are retrieved.</li>
+      <li><strong>Collaborative filtering.</strong> Videos co-watched by users with overlapping history are promoted.</li>
+      <li><strong>Popularity prior.</strong> A small fraction of globally popular items is mixed in to support exploration and cold-start users.</li>
+    </ol>
+
+    <p>
+      Already-watched videos are removed from $C_u$.
+    </p>
+
+    <h3>2.2 Ranking</h3>
+    <p>
+      Each candidate $v \in C_u$ receives a scalar score $s(u,v)$. The current implementation uses a transparent linear combination:
+    </p>
+
+    <div class="math-block">
+      $$
+      s(u,v) = \alpha \cdot \mathrm{sim}(e_u, e_v) + \beta \cdot \mathrm{retention}(v) + \gamma \cdot \mathrm{popularity}(v)
+      $$
+    </div>
+
+    <p>
+      where $e_u$ and $e_v$ are the user and video embeddings, $\mathrm{sim}$ is cosine similarity, and $\alpha+\beta+\gamma=1$. The ranked list is obtained by sorting candidates in descending order of $s(u,v)$.
+    </p>
+
+    <h2>3. Feature Construction</h2>
+
+    <h3>3.1 Video Embedding</h3>
+    <p>
+      A simple bag-of-tags embedding is used. For a video $v$ with tag set $T_v$:
+    </p>
+
+    <div class="math-block">
+      $$
+      e_v[i] = \frac{1}{\| \tilde{e}_v \|_2} \sum_{t \in T_v} \mathbf{1}_{\{h(t) \bmod d = i\}}
+      $$
+    </div>
+
+    <p>
+      where $h$ is a hash function and $d$ is the embedding dimension (default 32). The vector is $\ell_2$-normalized.
+    </p>
+
+    <h3>3.2 User Embedding</h3>
+    <p>
+      The user embedding is a watch-time-weighted average of the embeddings of previously watched videos:
+    </p>
+
+    <div class="math-block">
+      $$
+      e_u = \frac{1}{Z} \sum_{(v,w) \in H_u} w \cdot e_v, \qquad Z = \sum_{(v,w) \in H_u} w
+      $$
+    </div>
+
+    <p>
+      where $H_u$ is the user’s recent watch history and $w$ is the observed watch duration in seconds. The result is again $\ell_2$-normalized.
+    </p>
+
+    <h2>4. Formal Algorithm</h2>
+
+    <div class="algorithm">
+<pre>
+<span class="kw">Algorithm</span> Recommend(u, n)
+<span class="comment">Input:</span>  user u, desired list length n
+<span class="comment">Output:</span> ordered list of n video identifiers
+
+1:  H<sub>u</sub> ← watch history of u
+2:  e<sub>u</sub> ← UserEmbedding(H<sub>u</sub>)
+3:
+4:  <span class="comment">// Candidate Generation</span>
+5:  C ← ∅
+6:  C ← C ∪ NearestNeighbors(e<sub>u</sub>, k=400)          <span class="comment">// embedding retrieval</span>
+7:  C ← C ∪ CoWatchCandidates(u, k=200)            <span class="comment">// collaborative</span>
+8:  C ← C ∪ PopularitySample(k=100)                <span class="comment">// exploration</span>
+9:  C ← C \ {v | v already watched by u}
+10:
+11: <span class="comment">// Ranking</span>
+12: for each v ∈ C do
+13:     e<sub>v</sub> ← VideoEmbedding(v)
+14:     sim ← cosine(e<sub>u</sub>, e<sub>v</sub>)
+15:     ret ← average watch fraction of v
+16:     pop ← log(1 + view_count(v))
+17:     s(v) ← 0.55·sim + 0.25·ret + 0.20·pop
+18: end for
+19:
+20: return Top-n videos ordered by descending s(v)
+</pre>
+    </div>
+
+    <h2>5. Feedback Loop</h2>
+    <p>
+      Every interaction (watch, like, “not interested”) updates two structures:
+    </p>
+    <ul>
+      <li>the user’s watch history $H_u$ (rolling window),</li>
+      <li>the video’s aggregate statistics (view count and total watch time).</li>
+    </ul>
+    <p>
+      These updates immediately affect future candidate generation and ranking for that user and for collaborative signals.
+    </p>
+
+    <h2>6. Implementation Notes</h2>
+    <p>
+      A complete reference implementation is provided in Rust. The design is deliberately modular:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>File</th>
+          <th>Responsibility</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Data models</td>
+          <td><code>models.rs</code></td>
+          <td>User, Video, Interaction structures</td>
+        </tr>
+        <tr>
+          <td>Features</td>
+          <td><code>features.rs</code></td>
+          <td>Embedding construction &amp; cosine similarity</td>
+        </tr>
+        <tr>
+          <td>Candidates</td>
+          <td><code>candidate.rs</code></td>
+          <td>High-recall retrieval strategies</td>
+        </tr>
+        <tr>
+          <td>Ranking</td>
+          <td><code>ranking.rs</code></td>
+          <td>Scoring function</td>
+        </tr>
+        <tr>
+          <td>Engine</td>
+          <td><code>engine.rs</code></td>
+          <td>Orchestration &amp; public API</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      The linear ranking function can be replaced by any supervised model (gradient boosting, neural network, etc.) without altering the rest of the pipeline.
+    </p>
+
+    <h2>7. Clean-Room Statement</h2>
+    <p>
+      This algorithm was designed solely from:
+    </p>
+    <ul>
+      <li>public platform documentation describing recommendation goals and high-level signals,</li>
+      <li>the 2016 research paper that first publicly outlined a two-stage deep recommendation architecture for video,</li>
+      <li>standard techniques from the open recommender-systems literature (collaborative filtering, embedding retrieval, multi-stage ranking).</li>
+    </ul>
+    <p>
+      No proprietary source code, model checkpoints, internal feature lists, or non-public documentation were examined or reproduced. The implementation is therefore an independent creation suitable for clean-room development.
+    </p>
+
+    <footer>
+      Clean-room educational prototype · November 2026<br>
+      All algorithms and code original · Free of proprietary intellectual property
+    </footer>
+
+  </div>
+</body>
+</html>
